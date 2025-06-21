@@ -20,7 +20,7 @@ int main(void) {
         struct VfsBase *outfile = VfsDirOpenFile((struct VfsBase*)logos, output, "w");
 
         struct Vector *icon = GetIpaIcon(app, count);
-        VfsWrite(outfile, VectorGetFront(icon), 0, VectorGetSize(icon));
+        VfsWrite(outfile, VectorFront(icon), 0, VectorGetSize(icon));
 
         VfsDirCloseFile((struct VfsBase*)logos, outfile);
         VectorDestroy(icon);

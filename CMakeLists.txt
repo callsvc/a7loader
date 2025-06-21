@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.31)
 project(a7loader C)
 
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+# set(CMAKE_C_FLAGS "-fsanitize=address")
+
 add_executable(a7loader
         src/main.c
         src/type.c
@@ -32,6 +35,8 @@ add_executable(a7loader
         src/hle/collection.h
         src/hle/content.c
         src/hle/content.h
+        src/formats/property_list.c
+        src/formats/property_list.h
 )
 
 target_include_directories(a7loader PUBLIC
@@ -41,4 +46,4 @@ target_include_directories(a7loader PUBLIC
 
 set(BUILD_REGRESS OFF CACHE BOOL "Build regression tests" FORCE)
 add_subdirectory(vendor/libzip)
-target_link_libraries(a7loader PRIVATE libzip::zip)
+target_link_libraries(a7loader PRIVATE libzip::zip m)

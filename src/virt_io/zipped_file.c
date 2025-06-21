@@ -4,8 +4,13 @@
 
 void ZippedFileRead(struct VfsBase *vfs, void *data, const size_t offset, const size_t size) {
     const struct ZippedFile *zip = (struct ZippedFile *)vfs;
-    if (zip_file_is_seekable(zip->file))
+    if (!zip_file_is_seekable(zip->file)) {
+        if (offset)
+            while (zip_ftell(zip->file) != offset)
+                zip_fread(zip->file, data, 1);
+    } else {
         zip_fseek(zip->file, offset, SEEK_SET);
+    }
     assert(zip_fread(zip->file, data, size) == size);
 }
 

@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <string.h>
 #include <regex.h>
 
 #include <loader/bundle.h>
@@ -26,9 +25,12 @@ const char * GetBundleName(const struct IPA *ipa) {
     regcomp(&regex, pattern, REG_EXTENDED);
 
     for (int count = 0; count < VectorGetSize(files) && !result; count++) {
-        if (!regexec(&regex, VectorGet(files, count), 1, &match, 0))
-            result = Strdupn(VectorGet(files, count) + match.rm_so, match.rm_eo - match.rm_so + 1);
+        const char *filename = VectorGet(files, count);
+        if (!regexec(&regex, filename, 1, &match, 0))
+            result = Strdupn(filename + match.rm_so, match.rm_eo - match.rm_so + 1);
     }
+    regfree(&regex);
+
     VectorDestroy(files);
     return result;
 }

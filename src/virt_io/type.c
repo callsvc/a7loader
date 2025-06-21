@@ -1,7 +1,9 @@
 #include <string.h>
 
 #include <type.h>
+#include <vector.h>
 #include <virt_io/type.h>
+
 
 void VfsInit(struct VfsBase * vfs, const char *path, const char *mode) {
     pthread_mutex_init(&vfs->mutex, NULL);
@@ -62,6 +64,15 @@ void VfsWrite(struct VfsBase *vfs, const void *data, const size_t offset, const 
 
 void VfsRead(struct VfsBase *vfs, void *data, const size_t offset, const size_t size) {
     vfs->Read(vfs, data, offset, size);
+}
+
+struct Vector * VfsReadContent(struct VfsBase *vfs) {
+    struct Vector *result = VectorCreate(VecOfBytes);
+    const size_t size = VfsGetSize(vfs);
+    if (size)
+        VectorSetSize(result, size);
+    VfsRead(vfs, VectorFront(result), 0, size);
+    return result;
 }
 
 struct Vector * VfsListAllFiles(struct VfsBase *vfs, bool recursive) {

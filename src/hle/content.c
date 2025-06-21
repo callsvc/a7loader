@@ -24,7 +24,7 @@ struct Vector * GetIpaIcon(const struct App *app, const size_t index) {
 
     struct Vector *result = VectorCreate(VecOfBytes);
     VectorSetSize(result, size);
-    memcpy(VectorGetFront(result), buffer, size);
+    memcpy(VectorFront(result), buffer, size);
 
     Free(logo);
     VfsDirCloseFile(ipa->appfs, file);

@@ -53,4 +53,5 @@ void VfsWrite(struct VfsBase *vfs, const void *data, size_t offset, size_t size)
 void VfsRead(struct VfsBase *vfs, void *data, size_t offset, size_t size);
 
 struct Vector * VfsListAllFiles(struct VfsBase *vfs, bool recursive);
+struct Vector *VfsReadContent(struct VfsBase *vfs);
 

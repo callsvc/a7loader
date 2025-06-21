@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <string.h>
 
 #include <zip.h>
 
@@ -59,25 +58,46 @@ void InstallIpa(char *install, const char *filename) {
 
 }
 
+char* IpaInfoListPath(const struct IPA *ipamold) {
+    char *paths = MergePaths(3, "Payload", ipamold->name, "Info.plist");
+    return paths;
+}
+
 struct IPA *IpaOpen(const struct App *app, const char *filename) {
-    struct IPA *handler = Malloc(sizeof(struct IPA));
+    struct IPA *ipamold = Malloc(sizeof(struct IPA));
 
     if (app->installDir) {
         InstallIpa(app->installDir, filename);
-        handler->appfs = (struct VfsBase*)DirOpen(app->installDir);
+        ipamold->appfs = (struct VfsBase*)DirOpen(app->installDir);
     } else {
-        handler->appfs = (struct VfsBase*)ZippedDirOpen(filename);
-        handler->zipped = true;
+        ipamold->appfs = (struct VfsBase*)ZippedDirOpen(filename);
+        ipamold->zipped = true;
     }
-    handler->name = GetBundleName(handler);
+    ipamold->name = GetBundleName(ipamold);
+    const char *infoname = IpaInfoListPath(ipamold);
+    struct VfsBase *plistfile = VfsDirOpenFile(ipamold->appfs, infoname, "r");
 
-    return handler;
+    if (plistfile)
+        ipamold->infoplist = PListParser(plistfile);
+
+    if (ipamold->name)
+        Free((char*)ipamold->name);
+    const char *bundle = PListGetText(ipamold->infoplist, "CFBundleName");
+    ipamold->name = Malloc(snprintf(NULL, 0, "%s.app", bundle) + 1);
+    sprintf((char*)ipamold->name, "%s.app", bundle);
+
+    VfsDirCloseFile(ipamold->appfs, plistfile);
+
+    Free((void*)infoname);
+    return ipamold;
 }
-void IpaClose(struct IPA *ipa) {
-    free((void*)ipa->name);
-    if (!ipa->zipped)
-        DirClose((struct Dir*)ipa->appfs);
+void IpaClose(struct IPA *ipamold) {
+    free((void*)ipamold->name);
+    if (!ipamold->zipped)
+        DirClose((struct Dir*)ipamold->appfs);
     else
-        ZippedDirClose((struct ZippedDir*)ipa->appfs);
-    free(ipa);
+        ZippedDirClose((struct ZippedDir*)ipamold->appfs);
+
+    PListDestroy(ipamold->infoplist);
+    free(ipamold);
 }
