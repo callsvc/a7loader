@@ -9,9 +9,9 @@
 #include <virt_io/file.h>
 #include <virt_io/dir.h>
 
-#include <loader/ipa.h>
-
 #include <virt_io/zipped_dir.h>
+#include <loader/bundle.h>
+#include <loader/ipa.h>
 
 
 void ExtractEntry(zip_file_t *entry, const char *target) {
@@ -61,7 +61,6 @@ void InstallIpa(char *install, const char *filename) {
 
 struct IPA *IpaOpen(const struct App *app, const char *filename) {
     struct IPA *handler = Malloc(sizeof(struct IPA));
-    handler->name = strdup(filename);
 
     if (app->installDir) {
         InstallIpa(app->installDir, filename);
@@ -70,11 +69,12 @@ struct IPA *IpaOpen(const struct App *app, const char *filename) {
         handler->appfs = (struct VfsBase*)ZippedDirOpen(filename);
         handler->zipped = true;
     }
+    handler->name = GetBundleName(handler);
 
     return handler;
 }
 void IpaClose(struct IPA *ipa) {
-    free(ipa->name);
+    free((void*)ipa->name);
     if (!ipa->zipped)
         DirClose((struct Dir*)ipa->appfs);
     else

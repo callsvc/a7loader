@@ -3,7 +3,7 @@
 #include <app.h>
 
 struct IPA {
-    char *name;
+    const char *name;
 
     struct VfsBase *appfs;
     bool zipped;

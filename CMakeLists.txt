@@ -16,6 +16,8 @@ add_executable(a7loader
         src/buffers.h
         src/loader/ipa.c
         src/loader/ipa.h
+        src/loader/bundle.c
+        src/loader/bundle.h
         src/virt_io/dir.c
         src/virt_io/dir.h
         src/virt_io/file.c

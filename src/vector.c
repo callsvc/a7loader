@@ -9,7 +9,7 @@
 size_t SizeofType(const struct Vector *vec, const void *data) {
     if (data != NULL)
         if (vec->type == VecOfStrings && isprint(*(char*)data))
-            return strlen(data);
+            return strlen(data) + 1; // Null byte is always eval
     if (vec->type == VecOfBytes)
         return 1;
     if (vec->type == VecOfPointers)
@@ -30,10 +30,15 @@ void* GetIter(const struct Vector *vec, const size_t index) {
     if (vec->type != VecOfStrings)
         return (unsigned char*)vec->data + SizeofType(vec, NULL) * index;
 
+    char *last = NULL;
     char *result = vec->data;
-    for (int count = 0; count < index; count++)
-        if ((result = strchr(result, '\0')) == NULL)
-            return NULL;
+    for (int count = 0; count < index && result < vec->data + vec->capacity; count++) {
+        if ((last = strchr(result, '\0')) == NULL)
+            break;
+        if (last == result)
+            break;
+        result = ++last;
+    }
     return result;
 }
 void* VectorGetBack(const struct Vector *vec) {
@@ -88,10 +93,11 @@ void VectorResize(struct Vector *vec, size_t size) {
 }
 
 void VectorEmplace(struct Vector *vec, const void *data) {
+    const size_t use = SizeofType(vec, data);
     if (!vec->capacity)
-        VectorResize(vec, SizeofType(vec, data));
-    if (vec->size >= vec->capacity)
-        VectorResize(vec, vec->capacity * 2 + SizeofType(vec, data));
+        VectorResize(vec, use);
+    if (vec->size + use >= vec->capacity)
+        VectorResize(vec, vec->capacity * 2 + use);
 
     switch (vec->type) {
         case VecOfStrings:
@@ -100,7 +106,7 @@ void VectorEmplace(struct Vector *vec, const void *data) {
         case VecOfPointers:
             memcpy(VectorGetBack(vec), &data, sizeof(void*)); break;
     }
-    vec->size += SizeofType(vec, data);
+    vec->size += use;
 }
 
 void VectorDestroy(struct Vector *vec) {

@@ -38,5 +38,5 @@ size_t GetIpasCount(const struct App *app) {
 const char * GetIpaName(const struct App *app, const size_t index) {
     if (GetIpasCount(app) < index)
         return NULL;
-    return VfsGetName(VectorGet(app->ipalist, index));
+    return ((struct IPA*)VectorGet(app->ipalist, index))->name;
 }
