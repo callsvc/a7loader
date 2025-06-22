@@ -58,23 +58,9 @@ void InstallIpa(char *install, const char *filename) {
 
 }
 
-char* IpaInfoListPath(const struct IPA *ipamold) {
-    char *paths = MergePaths(3, "Payload", ipamold->name, "Info.plist");
-    return paths;
-}
-
-struct IPA *IpaOpen(const struct App *app, const char *filename) {
-    struct IPA *ipamold = Malloc(sizeof(struct IPA));
-
-    if (app->installDir) {
-        InstallIpa(app->installDir, filename);
-        ipamold->appfs = (struct VfsBase*)DirOpen(app->installDir);
-    } else {
-        ipamold->appfs = (struct VfsBase*)ZippedDirOpen(filename);
-        ipamold->zipped = true;
-    }
+void SetIpaName(struct IPA *ipamold) {
     ipamold->name = GetBundleName(ipamold);
-    const char *infoname = IpaInfoListPath(ipamold);
+    const char *infoname = MergePaths(3, "Payload", ipamold->name, "Info.plist");
     struct VfsBase *plistfile = VfsDirOpenFile(ipamold->appfs, infoname, "r");
 
     if (plistfile)
@@ -89,6 +75,20 @@ struct IPA *IpaOpen(const struct App *app, const char *filename) {
     VfsDirCloseFile(ipamold->appfs, plistfile);
 
     Free((void*)infoname);
+}
+
+struct IPA *IpaOpen(const struct App *app, const char *filename) {
+    struct IPA *ipamold = Malloc(sizeof(struct IPA));
+
+    if (app->installDir) {
+        InstallIpa(app->installDir, filename);
+        ipamold->appfs = (struct VfsBase*)DirOpen(app->installDir);
+    } else {
+        ipamold->appfs = (struct VfsBase*)ZippedDirOpen(filename);
+        ipamold->zipped = true;
+    }
+    SetIpaName(ipamold);
+
     return ipamold;
 }
 void IpaClose(struct IPA *ipamold) {
