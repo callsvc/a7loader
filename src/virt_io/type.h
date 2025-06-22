@@ -34,19 +34,19 @@ const char* VfsGetPath(const struct VfsBase *vfs);
 const char* VfsGetName(const struct VfsBase *vfs);
 
 #define VFS_WRITE(obj, func)\
-    obj->vfs.Write = func
+    ((struct VfsBase *)obj)->Write = func
 #define VFS_READ(obj, func)\
-    obj->vfs.Read = func
+    ((struct VfsBase *)obj)->Read = func
 #define VFS_CLOSE_FILE(obj, func)\
-    obj->vfs.DirCloseFile = func
+    ((struct VfsBase *)obj)->DirCloseFile = func
 
 #define VFS_GET_SIZE(obj, func)\
-    obj->vfs.GetSize = func
+    ((struct VfsBase *)obj)->GetSize = func
 
 #define VFS_LIST_ALL_FILES(obj, func)\
-    obj->vfs.ListAllFiles = func
+    ((struct VfsBase *)obj)->ListAllFiles = func
 #define VFS_OPEN_FILE(obj, func)\
-    obj->vfs.DirOpenFile = func
+    ((struct VfsBase *)obj)->DirOpenFile = func
 
 
 void VfsWrite(struct VfsBase *vfs, const void *data, size_t offset, size_t size);
